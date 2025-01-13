@@ -1,0 +1,594 @@
+{
+	"info": {
+		"_postman_id": "7b0462aa-dbb5-4748-9ba6-4959bfcdcb3e",
+		"name": "Simple Book Api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40789393",
+		"_collection_link": "https://a00000-0982.postman.co/workspace/a-Workspace~3296f5ee-aef5-484b-b61c-6d5c1d45da8d/collection/40789393-7b0462aa-dbb5-4748-9ba6-4959bfcdcb3e?action=share&source=collection_link&creator=40789393"
+	},
+	"item": [
+		{
+			"name": "Get Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Set a global variable\r",
+							"pm.globals.set(\"globalVar\", \"globalValue\");\r",
+							"\r",
+							"// Set a collection variable\r",
+							"pm.collectionVariables.set(\"collectionVar\", \"collectionValue\");\r",
+							"\r",
+							"// Set an environment variable\r",
+							"pm.environment.set(\"envVar\", \"envValue\");\r",
+							"\r",
+							"console.log(\"Variables have been set.\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/status",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list of books",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response JSON\r",
+							"let res = pm.response.json();\r",
+							"\r",
+							"// Filter books based on availability\r",
+							"let availableBooks = res.filter(book => book.available === true);\r",
+							"\r",
+							"// Check if there are available books\r",
+							"if (availableBooks.length > 0) {\r",
+							"    let selectedBook = availableBooks[0]; // Select the first available book\r",
+							"    pm.collectionVariables.set(\"bookId\", selectedBook.id); // Save the bookId to a collection variable\r",
+							"} else {\r",
+							"    console.log(\"No available books found.\");\r",
+							"}\r",
+							"\r",
+							"// Add a test to ensure the response has required fields\r",
+							"pm.test(\"Each book has required keys\", () => {\r",
+							"    res.forEach(book => {\r",
+							"        pm.expect(book).to.have.property(\"id\");\r",
+							"        pm.expect(book).to.have.property(\"name\");\r",
+							"        pm.expect(book).to.have.property(\"available\");\r",
+							"    });\r",
+							"});\r",
+							"// Search for data in the response body using a for loop\r",
+							"pm.test(\"Search for data in the response body\", () => {\r",
+							"    let res = pm.response.json();\r",
+							"    let searchTerm = \"fiction\";\r",
+							"    let foundBooks = [];\r",
+							"\r",
+							"    for (let i = 0; i < res.length; i++) {\r",
+							"        if (res[i].type.toLowerCase() === searchTerm) {\r",
+							"            foundBooks.push(res[i]);\r",
+							"        }\r",
+							"    }\r",
+							"\r",
+							"    if (foundBooks.length === 0) {\r",
+							"        console.log(`No books found with type ${searchTerm}.`);\r",
+							"    }\r",
+							"});\r",
+							"// Add console output to the test script\r",
+							"console.log(\"Available books:\", availableBooks);\r",
+							"console.log(\"Selected book ID:\", pm.collectionVariables.get(\"bookId\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/books?type=fiction",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "fiction"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a single book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Check if the response contains the 'id' property\r",
+							"pm.test(\"Response contains 'id'\", function () {\r",
+							"    pm.expect(response).to.have.property(\"id\");\r",
+							"    console.log(\"Book ID in response:\", response.id);\r",
+							"});\r",
+							"\r",
+							"// Test if the fetched book details match the expected book ID\r",
+							"pm.test(\"Fetched specific book details\", function () {\r",
+							"    const bookId = pm.environment.get(\"bookId\");\r",
+							"    pm.expect(bookId).to.not.be.undefined;\r",
+							"    pm.expect(response.id).to.eql(Number(bookId)); // Ensure the types match\r",
+							"    console.log(\"Expected Book ID:\", bookId);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/books/:bookId?type=non-fiction",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"books",
+						":bookId"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "non-fiction"
+						}
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "{{bookid}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register api client",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body\r",
+							"let res = pm.response.json();\r",
+							"\r",
+							"// Debug log the entire response body\r",
+							"console.log(\"Response body:\", res);\r",
+							"\r",
+							"// Check and store dynamic data\r",
+							"if (res.clientId && res.accessToken) {\r",
+							"    pm.collectionVariables.set(\"clientId\", res.clientId);\r",
+							"    pm.collectionVariables.set(\"accessToken\", res.accessToken);\r",
+							"\r",
+							"    // Log success\r",
+							"    console.log(\"Client ID:\", res.clientId);\r",
+							"    console.log(\"Access Token:\", res.accessToken);\r",
+							"} else {\r",
+							"    console.log(\"Error: Missing clientId or accessToken in the response\");\r",
+							"}\r",
+							"\r",
+							"// Test to validate stored variables\r",
+							"pm.test(\"Verify dynamic data is stored\", () => {\r",
+							"    pm.expect(pm.collectionVariables.get(\"clientId\")).to.exist;\r",
+							"    pm.expect(pm.collectionVariables.get(\"accessToken\")).to.exist;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"clientName\": \"{{$randomFullName}}\",\r\n    \"clientEmail\": \"{{$randomExampleEmail}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/api-clients",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"api-clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "orderbooks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.test(\"Order placed successfully\", function () {\r",
+							"    pm.expect(response.orderId).to.exist;\r",
+							"});\r",
+							"pm.environment.set(\"orderId\", response.orderId);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"customerName\": \"John Doe\",\r\n    \"bookId\": {{bookid}},\r\n    \"quantity\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/orders",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Check if there's an order by a specific customer name\", () => {\r",
+							"    const response = pm.response.json(); // Parse the response body as JSON\r",
+							"\r",
+							"    // Define the customer name to search for\r",
+							"    const targetCustomerName = \"John Doe\"; // Replace with the actual name you are searching for\r",
+							"\r",
+							"    // Use the `find` method to look for an order by the target customer name\r",
+							"    const orderByCustomer = response.find(order => order.customerName === targetCustomerName);\r",
+							"\r",
+							"    // Log the response for debugging\r",
+							"    console.log(\"Response:\", response);\r",
+							"\r",
+							"    // Check if an order was found\r",
+							"    if (orderByCustomer) {\r",
+							"        // If found, validate the customer name\r",
+							"        pm.expect(orderByCustomer).to.be.an(\"object\");\r",
+							"        pm.expect(orderByCustomer.customerName).to.equal(targetCustomerName);\r",
+							"        console.log(\"Order found for customer:\", orderByCustomer);\r",
+							"    } else {\r",
+							"        // If not found, fail the test with a custom error message\r",
+							"        pm.expect.fail(`No order found for customer name: ${targetCustomerName}`);\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/orders",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get an order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.test(\"Fetched order details\", function () {\r",
+							"    pm.expect(response.id).to.eql(pm.environment.get(\"orderId\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/orders/:orderId",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{order_new}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch Update order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Order updated successfully\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"quantity\": 3\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/orders/:orderId",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{order_new}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Order deleted successfully\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Access-token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/orders/:orderId",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{order_new}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseurl",
+			"value": "https://simple-books-api.glitch.me"
+		},
+		{
+			"key": "Access-token",
+			"value": "token-value",
+			"type": "string"
+		},
+		{
+			"key": "order_new",
+			"value": "rRngqHNKAhb6QGMaDky9p"
+		},
+		{
+			"key": "bookId",
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "collectionVar",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "sessionId",
+			"value": ""
+		},
+		{
+			"key": "clientId",
+			"value": ""
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		}
+	]
+}
